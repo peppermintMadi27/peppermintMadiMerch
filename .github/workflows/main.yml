@@ -1,0 +1,47 @@
+name: Build and Deploy site
+
+on:
+  push:
+    branches:
+      - 'main'
+#  pull_request:
+#    branches:
+#      - 'main'
+
+concurrency:
+  group: ${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+# TODO:
+#  build:
+
+  deploy:
+    name: Deploy the staging site
+    runs-on: ubuntu-latest
+#    needs:
+#      - build
+    # if:  github.ref_name == 'main'
+    steps:
+#      - name: Download artifact
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: Built Site
+#          path: _site/
+
+      - name: Install SSH key
+        # if: github.ref_name == 'main'
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Trust SSH key
+        # if: github.ref_name == 'main'
+        run: ssh-keyscan peppermintmadi.art > ~/.ssh/known_hosts
+
+      - name: Deploy Staging
+        # if: github.ref_name == 'main'
+        run: |
+          scp -r ${{ github.workspace }}/* ${{ secrets.USERNAME }}@peppermintmadi.art:~/staging/
+          ssh ${{ secrets.USERNAME }}@peppermintmadi.art 'rm -rf ~/peppermintmadi.art/* \
+          && mv ~/staging/* ~/peppermintmadi.art/'

@@ -1,0 +1,11 @@
+services:
+  npm:
+    image: node:current-bookworm
+    command:
+      - npm
+      - start
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/app
+    working_dir: /app
